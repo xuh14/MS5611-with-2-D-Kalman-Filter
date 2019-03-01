@@ -8,7 +8,12 @@
  * Copyright (c) 2019 <xuh14@miamioh.edu>
  * 
  * A library for barometer MS5611 with 2-d Kalman filter
- * This library will implement I2C communication to get the barometer MS5611 data and process with filtering
+ * This library will implement I2C communication to get the barometer MS5611 data and process with filtering to get smoother result
+ * The library is served as a basis of a sensor fusion system for measuring altitude. Due to the fact that barometer is very sensitive 
+ * to temperature, sensors such as accelorometer or GPS can be used to correct barometer data due to special conditions such as fast 
+ * warm wind. Here is a basic implementation used with accelerometer.
+ *
+ *
  * USER_FIL_OPTION = 0 : circular array averaging;
  * USER_FIL_OPTION = 1 : 2-D Kalman filtering
  *
@@ -30,6 +35,9 @@
  * altitude is calculated based on both temp & pressure thus will need to collect both temp & pressure data first
  * In the process, the program switches between temp & pressure to reduce run time 
  * and use timers to contour 10ms deadzone for applications required fast loop
+ *
+ * MPU9250 accelerometer has been used for testing, though, data from double integral will tend to drift, thus it is replaced
+ * with gaussian noise and can lead to smoother values.
  *
  * Latency Test:
  * CIRAVG_SIZE = 32 : 1.108ms
