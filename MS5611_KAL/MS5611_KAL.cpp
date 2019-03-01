@@ -94,7 +94,7 @@ void MS5611_KAL::MS5611_setup(bool USER_STARTZERO = false, float USER_Q = 0, flo
   data_ready_flag = 1; 
 
   //calibration
-  int N = 500;
+  int N = 1000;
   float sum = 0;
   for (int i = 0; i < N; i++) {
     MS5611_doconversion(RAW_PRESS_COMMAND);
@@ -105,6 +105,7 @@ void MS5611_KAL::MS5611_setup(bool USER_STARTZERO = false, float USER_Q = 0, flo
     MS5611_conversionResult();
     get_RAW_Altitude();
     sum = sum + baro_altitude;
+    delay(20);
   }
   average = sum / N;
 
@@ -183,12 +184,28 @@ float MS5611_KAL::getPressure() {
   int64_t deltaTemp = (baro_raw_temp - (((int32_t)baro_calibration[4]) << 8));
   int64_t off  = (((int64_t)baro_calibration[1]) << 16) + ((baro_calibration[3] * deltaTemp) >> 7);
   int64_t sens = (((int64_t)baro_calibration[0]) << 15) + ((baro_calibration[2] * deltaTemp) >> 8);
+  if (baro_temp < 20) {
+  	int64_t off2 = 5 * pow((baro_temp - 2000),2) / 2;
+  	int64_t sens2 = 5 * pow((baro_temp - 2000), 2) / 4;
+  	if (baro_temp < -15) {
+  		off2 = off2 + 7 * pow((baro_temp + 1500), 2);
+  		sens2 = sens2 + 11 * pow((baro_temp + 1500), 2) / 2;
+  	}
+  	off = off - off2;
+  	sens = sens - sens2;
+  }
   baro_pressure = ((((baro_raw_pressure * sens) >> 21) - off) >> (15-EXTRA_PRECISION)) / ((1<<EXTRA_PRECISION) * 100.0);
+  return baro_pressure;
 }
 
 float MS5611_KAL::getTemperature() {
   int64_t deltaTemp = (baro_raw_temp - (((int32_t)baro_calibration[4]) << 8));
   baro_temp =  ((1<<EXTRA_PRECISION)*2000l + ((deltaTemp * baro_calibration[5]) >> (23-EXTRA_PRECISION))) / ((1<<EXTRA_PRECISION) * 100.0);
+  if (baro_temp < 20) {
+  	float t2 = pow(deltaTemp, 2) / 2147483648;
+  	baro_temp = baro_temp - t2;
+  }
+  return baro_temp;
 }
 
 float MS5611_KAL::getMS5611data(float USER_ACC = 0, float USER_VEL = 0) {
