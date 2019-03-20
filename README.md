@@ -3,16 +3,41 @@
 
  * README
  * 
- * EDIT: Feb. 23, 2019
+ * EDIT: March 20, 2019
  * 
  * Copyright (c) 2019 <xuh14@miamioh.edu>
- * 
- * A library for barometer MS5611 with 2-d Kalman filter
- * This library will implement I2C communication to get the barometer MS5611 data and process with filtering to get smoother result
- * The library is served as a basis of a sensor fusion system for measuring altitude. Due to the fact that barometer is very sensitive 
- * to temperature, sensors such as accelorometer or GPS can be used to correct barometer data due to special conditions such as fast 
- * warm wind. Here is a basic implementation used with accelerometer.
  *
+ *
+ * ------------------------------------------------Description & Report-------------------------------------------------------
+ * Barometer-MS5611 is a chip that measures the atmoshphere pressure data that can achieve accuracy of 0.012 mbar.
+ * Altitude can be calculated from barometric equation below(from wiki.)
+ *
+ * The specific application focus for this library is to generate a steady altitude data from I2C connection with 
+ * data processing to help implement the altitude hold feature of a multiroter. 
+ * 
+ * From some pre-acknowledgement, altitude generated from MS5611 raw pressure data has a standard deviation of 0.1m while the
+ * tested result has standard deviation of 0.2m. The data, as shown below, has the trend of a normal distribution around the 
+ * mean value. Therefore, for steady control of a multiroter, some filters will be needed to process the raw data to prevent
+ * the multiroter from jumping up and down. 
+ *
+ * Here, two filters are implemented. First is a circular array filter that uses the mean of the array as the output, which
+ * the array size can be set by user. Kalman filter is also implemented to make use of the accelerometer that most multiroter
+ * has onboard. The equations used for Kalman filter is shown below. 
+ *
+ * Here, acceloremter is intended to be used as an estimation of the current altitude from equation X = Vo*t+ 1/2*a*t^2. The 
+ * system equation of the Kalman implementation is a 1-d equation that only contains acceleratio update but not velocity. 
+ * Users will need to provide pre-calculated velocity into the function.
+ * 
+ * In real testing, this approach of fusing the accelerometer has failed. The reason is mainly due to signal noise in discrete
+ * signal processing as the drift altitude or velocity will be cumulative and has drift of 1m every 3s. Instead, a P
+ * controller is added into the update equation. By using last stage barometer's raw altitude data as the estimation and the 
+ * current state as the measument data, a P controller can be used to adjust the smoothness of the data using the error, 
+ * measurement - estimation, times the adjustable gain. In the program, 0.1 is used. The P controller here, not in a 
+ * traditional sense, is to smooth the data rather than correct. It is used because from Kalman equtions, different Q and R
+ * values will make the value approahcing a steady state value and thus need a P controller to constantly add value into
+ * the equation and thus make it work.
+ *
+ * ------------------------------------------------------Settings-------------------------------------------------------
  *
  * USER_FIL_OPTION = 0 : circular array averaging;
  * USER_FIL_OPTION = 1 : 2-D Kalman filtering
