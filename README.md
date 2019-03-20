@@ -7,7 +7,7 @@
  * 
  *
  *
- * ------------------------------------------------Description & Report-------------------------------------------------------
+ * ------------------------------------------------Description & Report-----------------------------------------
  * Barometer-MS5611 is a chip that measures the atmoshphere pressure data that can achieve accuracy of 0.012 mbar.
  * Altitude can be calculated from barometric equation below(from wiki.)
  *
@@ -36,7 +36,7 @@
  * values will make the value approahcing a steady state value and thus need a P controller to constantly add value into
  * the equation and thus make it work.
  *
- * ------------------------------------------------------Settings-------------------------------------------------------
+ * ------------------------------------------------------Settings-------------------------------------------
  *
  * USER_FIL_OPTION = 0 : circular array averaging;
  * USER_FIL_OPTION = 1 : 2-D Kalman filtering
