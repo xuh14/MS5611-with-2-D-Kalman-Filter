@@ -31,10 +31,7 @@
  * signal processing as the drift altitude or velocity will be cumulative and has drift of 1m every 3s. Instead, a P
  * controller is added into the update equation. By using last stage barometer's raw altitude data as the estimation and the 
  * current state as the measument data, a P controller can be used to adjust the smoothness of the data using the error, 
- * measurement - estimation, times the adjustable gain. In the program, 0.1 is used. The P controller here, not in a 
- * traditional sense, is to smooth the data rather than correct. It is used because from Kalman equtions, different Q and R
- * values will make the value approahcing a steady state value and thus need a P controller to constantly add value into
- * the equation and thus make it work.
+ * measurement - estimation, times the adjustable gain. In the program, 0.1 is used.
  *
  * ------------------------------------------------------Settings-------------------------------------------
  *
